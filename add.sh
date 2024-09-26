@@ -1,7 +1,23 @@
 #!/bin/bash
 
-clustername="Lovely Amur" #завести заранее
-adcmip="10.6.16.120"  # завести заранее
+clustername="" #завести заранее  Lovely Amur
+adcmip="10.6.16.120"  # завести заранее 8000 port
+
+if [[ -z $adcmip ]]; then
+    echo "Correct variable hostname"
+    exit 0
+fi
+if [[ -z $clustername ]]; then
+    tokens=$(curl -s -X POST -H 'Content-type: application/json' -d '{"username": "admin","password": "admin"}' http://$adcmip:8000/api/v1/token/ )            
+    token=$(echo $tokens|awk -F"\"" '{print $4}')
+    #echo $token
+    clusters=`curl -s -X GET -H 'Content-type: application/json' -H 'Authorization: token '$token''  http://$adcmip:8000/api/v1/cluster/ `
+    echo "Cluster name:  [list]"
+    echo $clusters|jq -r '.[].name'
+
+    echo "Correct variable clustername"
+    exit 0
+fi
 
 while IFS="," read -r t1 t2 t3 t4 t5
 do
