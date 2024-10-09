@@ -30,7 +30,7 @@ ansible_host=$t4   # ip
 ansible_port=$t5
 #jsonadd="{\"description\":\"init\",\"config\":{\"ansible_user\":\"$ansible_user\",\"ansible_ssh_pass\":\"$ansible_pass\",\"ansible_host\":\"$ansible_host\",\"ansible_ssh_port\":\"$ansible_port\",\"ansible_become\":\"$ansible_become\",\"ansible_become_pass\":\"$ansible_pass\" }, \"attr\": {}}"
 
-echo $jsonadd|jq
+#echo $jsonadd|jq
 tokens=$(curl -s -X POST -H 'Content-type: application/json' -d '{"username": "admin","password": "admin"}' http://$adcmip:8000/api/v1/token/ )            
 token=$(echo $tokens|awk -F"\"" '{print $4}')
 #echo $token
