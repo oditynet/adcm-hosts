@@ -1,6 +1,6 @@
 #ADCM for ver 2023.11.28.07-270d139 (port 8000)
 
-Versions with JQ and SED
+Versions with JQ and AWK\grep
 
 Problem:  first add host for ET and etc script to do  automate
 Use only API v1 ADCM
