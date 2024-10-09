@@ -1,5 +1,8 @@
-# ADCM from Arenadata for ver 2023.11.28.07-270d139 (port 8000) from Arenadata Hadoop
+#ADCM for ver 2023.11.28.07-270d139 (port 8000)
 
+Versions with JQ and SED
+
+Problem:  first add host for ET and etc script to do  automate
 Use only API v1 ADCM
 
 Add new host and his config
