@@ -1,8 +1,8 @@
 #!/bin/bash
 
-clustername="ADB" #завести заранее  Lovely Amur
+clustername="ADQM" #завести заранее  Lovely Amur
 adcmip="10.6.16.120"  # завести заранее 8000 port
-
+edit=$1
 if [[ -z $adcmip ]]; then
     echo "Correct variable hostname"
     exit 0
@@ -14,15 +14,15 @@ if [[ -z $clustername ]]; then
     clusters=`curl -s -X GET -H 'Content-type: application/json' -H 'Authorization: token '$token''  http://$adcmip:8000/api/v1/cluster/ `
     echo "Cluster name:  [list]"
     #echo $clusters|jq -r '.[].name'
-    echo $clusters|grep -Po 'name":"\K[^",]*'|head -1
-    echo "Correct variable clustername"
+    echo $clusters|grep -Po 'name":"\K[^",]*'
+    echo "[!Error] Correct variable clustername in me..."
     exit 0
 fi
 
 while IFS="," read -r t1 t2 t3 t4 t5
 do
 
-echo "[*] Get $t1 $t2 $t3 $t4 $t5"
+echo "[*] Get $t1 *** $t3 $t4 $t5"
 ansible_user=$t1 
 ansible_pass=$t2
 hostname=$t3 #имя в adcm hostname
@@ -55,21 +55,37 @@ prototype_id=`echo $prototype_ids |grep -Po '"prototype_id":\K[^",]*'|head -1`
 
 echo "[+] Prototype_id: "$prototype_id
 echo "[+] Provider: "$provid
-#add
-#newhost=`curl -s -X POST -H 'Content-type: application/json' -H 'Authorization: token '$token'' -d '{"prototype_id":'$prototype_id', "provider_id": "'$provid'", "cluster_id":"'$idcluster'", "fqdn":"'$hostname'", "header": "init"}' http://$adcmip:8000/api/v1/host/`
-newhost=`curl -s -X POST -H 'Content-type: application/json' -H 'Authorization: token '$token'' -d '{"cluster_id":"'$idcluster'","prototype_id":'$prototype_id',  "provider_id": "'$provid'","fqdn":"'$hostname'", "header": "init"}' http://$adcmip:8000/api/v1/host/`
+if [[  -z $edit ]]; then
+    echo "Add new node"
+    #add
+    #newhost=`curl -s -X POST -H 'Content-type: application/json' -H 'Authorization: token '$token'' -d '{"prototype_id":'$prototype_id', "provider_id": "'$provid'", "cluster_id":"'$idcluster'", "fqdn":"'$hostname'", "header": "init"}' http://$adcmip:8000/api/v1/host/`
+    newhost=`curl -s -X POST -H 'Content-type: application/json' -H 'Authorization: token '$token'' -d '{"cluster_id":"'$idcluster'","prototype_id":'$prototype_id',  "provider_id": "'$provid'","fqdn":"'$hostname'", "header": "init"}' http://$adcmip:8000/api/v1/host/`
+    
+    #echo $newhost
+    #idnewhost=`echo $newhost | jq  ' .id'`
+    idnewhost=`echo $newhost |grep -Po '"id":\K[^,]*' `
 
-#echo $newhost
-#idnewhost=`echo $newhost | jq  ' .id'`
-idnewhost=`echo $newhost |grep -Po '"id":\K[^,]*' `
-
-
-echo "[+] New host id: "$idnewhost
-add=`curl -s -X POST -H 'Content-type: application/json' -H 'Authorization: token '$token'' -d '{"host_id":"'$idnewhost'"}'  http://$adcmip:8000/api/v1/cluster/$idcluster/host/`
-echo "[+] Host add to cluster."
+    echo "[+] New host id: "$idnewhost
+    add=`curl -s -X POST -H 'Content-type: application/json' -H 'Authorization: token '$token'' -d '{"host_id":"'$idnewhost'"}'  http://$adcmip:8000/api/v1/cluster/$idcluster/host/`
+    echo "[+] Host add to cluster."
+fi
 
 #editconfigs=`curl -s -X POST -H 'Content-type: application/json' -H 'Authorization: token '$token'' -d '$jsonadd' http://$adcmip:8000/api/v1/host/$idnewhost/config/history/`
-editconfigs=`curl -s -X POST -H 'Content-type: application/json' -H 'Authorization: token '$token'' -d '{"description":"init","config":{"ansible_user":"'$ansible_user'","ansible_ssh_pass":"'$ansible_pass'","ansible_host":"'$ansible_host'","ansible_ssh_port":"'$ansible_port'","ansible_become":true,"ansible_become_pass":"'$ansible_pass'" }, "attr": {}}' http://$adcmip:8000/api/v1/host/$idnewhost/config/history/`
-echo $editconfigs
+if [[  -z $edit ]]; then
+    editconfigs=`curl -s -X POST -H 'Content-type: application/json' -H 'Authorization: token '$token'' -d '{"description":"init","config":{"ansible_user":"'$ansible_user'","ansible_ssh_pass":"'$ansible_pass'","ansible_host":"'$ansible_host'","ansible_ssh_port":"'$ansible_port'","ansible_become":true,"ansible_become_pass":"'$ansible_pass'" }, "attr": {}}' http://$adcmip:8000/api/v1/host/$idnewhost/config/history/`
+    echo $editconfigs
+else
+    listhost=`curl -s -X GET -H 'Content-type: application/json' -H 'Authorization: token '$token''  http://$adcmip:8000/api/v1/host/`
+    nodecount=`echo $listhost |grep -Po '"id":\K[^",]*'`
+    for i in $nodecount; do
+	host_names=`curl -s -X GET -H 'Content-type: application/json' -H 'Authorization: token '$token''  http://$adcmip:8000/api/v1/host/$i/`
+	host_name=`echo $host_names |grep -Po '"fqdn":"\K[^",]*'`
+	if [[ "$hostname" == "$host_name" ]];then
+	    editconfigs=`curl -s -X POST -H 'Content-type: application/json' -H 'Authorization: token '$token'' -d '{"description":"init","config":{"ansible_user":"'$ansible_user'","ansible_ssh_pass":"'$ansible_pass'","ansible_host":"'$ansible_host'","ansible_ssh_port":"'$ansible_port'","ansible_become":true,"ansible_become_pass":"'$ansible_pass'" }, "attr": {}}' http://$adcmip:8000/api/v1/host/$i/config/history/`
+	    echo "[%] Edit host id "$i " and name "$host_name
+	fi
+    done
+
+fi
 
 done < <(cat hosts.csv)
