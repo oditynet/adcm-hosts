@@ -8,8 +8,7 @@ Use only API v1 ADCM
 Add new host and his config
 
 Output:
-
-```
+```console
 [*] Get root pass host1 10.6.16.2 9000
 [+] Cluster id: 4
 [+] Prototype_id: 74
@@ -28,6 +27,6 @@ Output:
 
 
 Edit exist node mode: 
-sh```
+```console
 bash addv1-grep.sh --edit
 ```
