@@ -27,7 +27,6 @@ Output:
 
 
 Edit exist node mode: 
-------------
 
-bash addv1-grep.sh --edit| bash
+bash addv1-grep.sh --edit
 
