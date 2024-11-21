@@ -38,7 +38,7 @@ ansible_port=$t5
 #echo $jsonadd|jq
 tokens=$(curl -s -X POST -H 'Content-type: application/json' -d '{"username": "admin","password": "admin"}' http://$adcmip:8000/api/v1/token/ )            
 token=$(echo $tokens|awk -F"\"" '{print $4}')
-echo $token
+#echo $token
 clusters=`curl -s -X GET -H 'Content-type: application/json' -H 'Authorization: token '$token''  http://$adcmip:8000/api/v1/cluster/ `
 echo "Cluster name: "$clusters
 
@@ -80,7 +80,7 @@ fi
 #editconfigs=`curl -s -X POST -H 'Content-type: application/json' -H 'Authorization: token '$token'' -d '$jsonadd' http://$adcmip:8000/api/v1/host/$idnewhost/config/history/`
 if [[  -z $edit ]]; then
     editconfigs=`curl -s -X POST -H 'Content-type: application/json' -H 'Authorization: token '$token'' -d '{"description":"init","config":{"ansible_user":"'$ansible_user'","ansible_ssh_pass":"'$ansible_pass'","ansible_host":"'$ansible_host'","ansible_ssh_port":"'$ansible_port'","ansible_become":true,"ansible_become_pass":"'$ansible_pass'" }, "attr": {}}' http://$adcmip:8000/api/v1/host/$idnewhost/config/history/`
-    echo $editconfigs
+#    echo $editconfigs
 else
     listhost=`curl -s -X GET -H 'Content-type: application/json' -H 'Authorization: token '$token''  http://$adcmip:8000/api/v1/host/`
     nodecount=`echo $listhost |grep -Po '"id":\K[^",]*'`
