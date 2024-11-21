@@ -8,21 +8,11 @@ Use only API v1 ADCM
 
 Add new host and his config
 
-
-Edit exist node mode: 
-
-
 If you want add new hosts,then:
-
 1) create clusters and add any hosts(hosts will be delete)
-
 2) bash addv1-grep.sh 
-
 If you want modify config of hosts,then:
-
-bash addv1-grep.sh --edit
-
-
+1) bash addv1-grep.sh --edit
 
 Output:
 
